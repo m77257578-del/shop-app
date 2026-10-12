@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>App Shop</title>
+<meta name="theme-color" content="#0B7A75">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F6F8FA;--ink:#0F1B2D;--mute:#5B6B7F;--card:#fff;--line:#DDE4EB;--brand:#0B7A75;--hi:#FFB703;--bad:#C62828;--r:14px}
+@media (prefers-color-scheme:dark){:root{--bg:#0C1522;--ink:#EAF0F6;--mute:#93A3B5;--card:#142133;--line:#23344A}}
+*{box-sizing:border-box;margin:0}
+body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);color:var(--ink)}
+button{font:inherit;cursor:pointer;border:0;color:inherit;background:none}
+:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+header{position:sticky;top:0;z-index:5;background:var(--brand);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 12px}
+.bar{display:flex;align-items:center;gap:10px;max-width:1100px;margin:auto}
+.bar h1{font-size:1.2rem;flex:1}
+.ib{position:relative;background:rgba(255,255,255,.16);border-radius:12px;padding:8px 12px;color:#fff}
+.badge{position:absolute;top:-6px;inset-inline-start:-6px;background:var(--hi);color:#000;border-radius:99px;min-width:20px;height:20px;font-size:.75rem;font-weight:700;display:grid;place-items:center}
+.search{max-width:1100px;margin:10px auto 0}
+input,select,textarea{font:inherit;color:inherit}
+.search input{width:100%;padding:11px 14px;border-radius:12px;border:0;background:#fff;color:#000}
+main{max-width:1100px;margin:auto;padding:14px 16px 30px}
+.cats{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px}
+.cats button{white-space:nowrap;padding:8px 16px;border-radius:99px;border:1px solid var(--line);background:var(--card)}
+.cats button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.pic{aspect-ratio:1;display:grid;place-items:center;font-size:3.6rem;background-size:cover;background-position:center}
+.info{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.info h3{font-size:.95rem}.info p{font-size:.8rem;color:var(--mute)}
+.price{font-weight:700;color:var(--brand)}
+.btn{background:var(--brand);color:#fff;border-radius:10px;padding:10px 14px;font-weight:600}
+.btn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.red{background:var(--bad)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.add{margin-top:auto}
+.empty{grid-column:1/-1;text-align:center;color:var(--mute);padding:40px 0}
+.pays{max-width:1100px;margin:10px auto 0;padding:14px 16px;border-top:1px solid var(--line);color:var(--mute);font-size:.88rem}
+.pays b{color:var(--ink)}
+footer{text-align:center;padding:10px 0 calc(20px + env(safe-area-inset-bottom))}
+footer button{color:var(--mute);font-size:.8rem}
+.shade{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
+.shade.on{opacity:1;pointer-events:auto}
+aside{position:fixed;top:0;bottom:0;inset-inline-end:0;width:min(420px,100%);background:var(--card);z-index:10;transform:translateX(-105%);transition:transform .25s;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+aside.on{transform:none}
+aside h2{padding:16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;font-size:1.1rem}
+.scroll{flex:1;overflow:auto;padding:8px 16px}
+.row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.row .th{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;font-size:1.6rem;background-size:cover;background-position:center;flex:none}
+.row .n{flex:1;font-size:.9rem}
+.qty{display:flex;align-items:center;gap:8px}
+.qty button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line)}
+.foot{padding:16px;border-top:1px solid var(--line);display:grid;gap:8px;max-height:60vh;overflow:auto;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+.f{padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);width:100%}
+.line{display:flex;justify-content:space-between}.tot{font-weight:700;font-size:1.1rem}
+.pm{display:flex;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.pm:has(input:checked){border-color:var(--brand);background:color-mix(in srgb,var(--brand) 10%,transparent)}
+.pdet{background:var(--bg);border-radius:10px;padding:10px;font-size:.88rem;display:grid;gap:6px}
+.pdet code{font-size:1.05rem;font-weight:700;direction:ltr;display:inline-block}
+.buy{background:#1FA855;color:#fff;border-radius:12px;padding:13px;font-weight:700}
+.buy:disabled{opacity:.4}
+#install{display:none}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(90px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;transition:transform .25s;z-index:30}
+.toast.on{transform:translateX(-50%)}
+/* admin */
+#admin{position:fixed;inset:0;z-index:20;background:var(--bg);display:none;flex-direction:column;padding-top:env(safe-area-inset-top)}
+#admin.on{display:flex}
+.ah{background:var(--ink);color:var(--bg);padding:12px 16px;display:flex;align-items:center;gap:10px}
+.ah h2{flex:1;font-size:1.05rem}
+.tabs{display:flex;gap:6px;padding:10px 16px;overflow-x:auto;border-bottom:1px solid var(--line)}
+.tabs button{padding:8px 14px;border-radius:99px;border:1px solid var(--line);background:var(--card);white-space:nowrap}
+.tabs button[aria-pressed=true]{background:var(--brand);color:#fff;border-color:var(--brand)}
+.ab{flex:1;overflow:auto;padding:16px;max-width:760px;width:100%;margin:auto}
+.box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;gap:8px;margin-bottom:14px}
+.box label{font-size:.82rem;color:var(--mute);display:grid;gap:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.li{display:flex;gap:10px;align-items:center;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+.li .n{flex:1;font-size:.9rem}.li small{color:var(--mute)}
+.login{margin:auto;width:min(320px,90%);display:grid;gap:10px;text-align:center}
+.login input{text-align:center;font-size:1.4rem;letter-spacing:.4em;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card)}
+.note{font-size:.82rem;color:var(--mute);line-height:1.7}
+#logo{width:36px;height:36px;border-radius:10px;object-fit:cover}
+#gate{position:fixed;inset:0;z-index:15;background:var(--bg);display:none;place-items:center;padding:20px;overflow:auto}
+#gate.on{display:grid}
+.gbox{width:min(360px,100%);display:grid;gap:10px;text-align:center}
+.gbox img{width:84px;height:84px;border-radius:20px;margin:auto;object-fit:cover}
+.gbox h2{font-size:1.3rem}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.gbox .f{padding:12px;font-size:1rem}
+.lnk{color:var(--mute);font-size:.82rem;text-decoration:underline}
+dialog{border:0;border-radius:var(--r);padding:18px;width:min(380px,92%);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.fab{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));left:16px;width:54px;height:54px;border-radius:50%;background:#1FA855;color:#fff;font-size:1.6rem;place-items:center;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:8;text-decoration:none}
+.st{font-size:.78rem;padding:3px 10px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <img id="logo" alt="" style="display:none"><h1 id="title">App Shop</h1>
+    <button id="install" class="ib">ثبّت التطبيق</button>
+    <button id="acctBtn" class="ib">👤 دخول</button>
+    <button id="cartBtn" class="ib" aria-label="فتح السلة">🛒<span class="badge" id="count">0</span></button>
+  </div>
+  <div class="search"><input id="q" type="search" placeholder="ابحث عن منتج..." aria-label="بحث"></div>
+</header>
+<main><div class="cats" id="cats"></div><div class="grid" id="grid"></div></main>
+<div class="pays" id="payInfo"></div>
+<footer><button id="adminLink">دخول الإدارة</button></footer>
+
+<div class="shade" id="shade"></div>
+<aside id="drawer" aria-label="سلة المشتريات">
+  <h2>سلة المشتريات <button id="close" aria-label="إغلاق">✕</button></h2>
+  <div class="scroll" id="items"></div>
+  <div class="foot" id="foot"></div>
+</aside>
+
+<a id="waFab" class="fab" target="_blank" rel="noopener" aria-label="تواصل عبر واتساب" style="display:none">💬</a>
+<dialog id="msg"></dialog>
+<section id="gate" aria-label="تسجيل الدخول"></section>
+<dialog id="acct"></dialog>
+<section id="admin" aria-label="لوحة الإدارة"></section>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== الربط بالسيرفر (Supabase): اتركه فارغاً لو مش عايز تفعّله =====
+// بعد ما تجهّز المشروع (راجع setup.sql) حط الرابط والمفتاح العام (anon public) هنا:
+const CLOUD = { url: '', key: '' };   // مثال: url:'https://xxxx.supabase.co'  key:'eyJ...'
+const cloudOn = () => !!(CLOUD.url && CLOUD.key);
+const sbHeaders = () => ({apikey: CLOUD.key, Authorization: 'Bearer ' + CLOUD.key, 'Content-Type': 'application/json'});
+async function rpc(fn, body){
+  const r = await fetch(CLOUD.url + '/rest/v1/rpc/' + fn, {method:'POST', headers:sbHeaders(), body:JSON.stringify(body)});
+  if(!r.ok) throw new Error(await r.text());
+  const t = await r.text(); return t ? JSON.parse(t) : null;
+}
+let saveTimer = null;
+const dirtyStock = new Set();   // منتجات غيّر الأدمن مخزونها بنفسه (باقي المخزون يحدده السيرفر)
+async function refreshStocks(){
+  if(!cloudOn()) return;
+  const r = await fetch(CLOUD.url + '/rest/v1/store?id=eq.1&select=data', {headers:sbHeaders(), cache:'no-store'});
+  const rows = await r.json(), data = rows[0] && rows[0].data, latest = data && data.products;
+  if(!latest){ S.products.forEach(p => dirtyStock.add(p.id)); cloudSave(); return; }   // أول مرة: انشر بيانات المتجر للسيرفر
+  if(!data.delivery) cloudSave();
+  S.products.forEach(p => { if(!dirtyStock.has(p.id)){ const q = latest.find(x => x.id === p.id); if(q) p.stock = q.stock; } });
+  Object.keys(cart).forEach(id => { const p = S.products.find(x => x.id == id); if(!p || p.stock <= 0) delete cart[id]; else if(cart[id] > p.stock) cart[id] = p.stock; });
+  try{ localStorage.setItem('as_cart', JSON.stringify(cart)); }catch{}
+}
+function cloudSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    let h = null; try{ h = sessionStorage.getItem('as_ah'); }catch{}
+    if(!h) return toast('سجّل دخول الإدارة من جديد ثم أعد المحاولة');
+    try{
+      const d = await rpc('save_store', {p_hash:h, p_data:{...S, settings:{...S.settings, adminHash:''}}, p_dirty:[...dirtyStock]});
+      dirtyStock.clear();
+      ((d && d.products) || []).forEach(q => { const p = S.products.find(x => x.id === q.id); if(p) p.stock = q.stock; });
+      renderStore(); toast('تم الحفظ والنشر ✓');
+    }
+    catch(e){ toast('تعذر الحفظ، تأكد من الاتصال أو من كود الإدارة'); }
+  }, 700);
+}
+const DEF_HASH = '674eeaa6e6454efc59ca2cd0692647315f6bd2398e73af5a6cd003dad0b912e9'; // كود الإدارة الافتراضي (مشفّر)
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DEF = {
+  settings:{name:'App Shop', whatsapp:'201000000000', currency:'ج.م', shipping:0, logo:'', adminHash:'', requireLogin:true, kashierOn:false, waButton:true, freeOver:0},
+  products:[
+    {id:1,name:'سماعة بلوتوث',price:450,cat:'إلكترونيات',stock:20,emoji:'🎧',desc:'صوت نقي وبطارية تدوم 20 ساعة',img:''},
+    {id:2,name:'ساعة ذكية',price:1200,cat:'إلكترونيات',stock:8,emoji:'⌚',desc:'تتبع النشاط والإشعارات',img:''},
+    {id:3,name:'تيشيرت قطن',price:180,cat:'ملابس',stock:50,emoji:'👕',desc:'قطن 100% بعدة مقاسات',img:''},
+    {id:4,name:'طقم أكواب',price:260,cat:'المنزل',stock:15,emoji:'☕',desc:'6 أكواب سيراميك',img:''}
+  ],
+  pays:[
+    {id:1,name:'فودافون كاش',detail:'01000000000',note:'حوّل المبلغ ثم اكتب رقم العملية',on:true},
+    {id:2,name:'إنستا باي',detail:'username@instapay',note:'حوّل المبلغ ثم اكتب رقم العملية',on:true},
+    {id:3,name:'تحويل بنكي',detail:'البنك الأهلي - حساب 0000 0000 0000',note:'اكتب اسم المحوِّل ورقم العملية',on:true},
+    {id:4,name:'الدفع عند الاستلام',detail:'',note:'ادفع للمندوب عند وصول الطلب',on:true}
+  ],
+  delivery:[
+    {id:1,name:'توصيل للمنزل',fee:50,needAddr:true,note:'يصلك خلال 2-4 أيام عمل',on:true},
+    {id:2,name:'استلام من المتجر',fee:0,needAddr:false,note:'',on:true}
+  ]
+};
+let S = structuredClone(DEF), cart = {}, cat = 'الكل', term = '', payId = null, delId = null, ordersList = [], users = {}, me = null;
+const money = n => Number(n).toLocaleString('ar-EG') + ' ' + S.settings.currency;
+const hue = id => `hsl(${(id*47)%360} 65% 88%)`;
+const pic = p => p.img ? `background-image:url(${p.img})` : `background:${hue(p.id)}`;
+
+async function load(){
+  if(cloudOn()){
+    try{
+      const r = await fetch(CLOUD.url + '/rest/v1/store?id=eq.1&select=data', {headers:sbHeaders(), cache:'no-store'});
+      const rows = await r.json();
+      if(rows[0] && rows[0].data && rows[0].data.products){ S = rows[0].data; try{ localStorage.setItem('as_cache', JSON.stringify(S)); }catch{} }
+    }catch{ try{ const c = localStorage.getItem('as_cache'); if(c) S = JSON.parse(c); }catch{} }
+  } else {
+    try{ const r = await fetch('data.json?'+Date.now(), {cache:'no-store'}); if(r.ok) S = await r.json(); }catch{}
+    try{ const d = localStorage.getItem('as_draft'); if(d) S = JSON.parse(d); }catch{}
+  }
+  try{ cart = JSON.parse(localStorage.getItem('as_cart')||'{}'); }catch{}
+  S.settings = {...DEF.settings, ...S.settings}; loadUsers();
+  if(!Array.isArray(S.delivery)){ S.delivery = structuredClone(DEF.delivery); if(Number(S.settings.shipping) > 0) S.delivery[0].fee = Number(S.settings.shipping); }
+}
+const saveCart = () => { try{ localStorage.setItem('as_cart', JSON.stringify(cart)); }catch{} };
+const saveDraft = () => { if(cloudOn()){ renderStore(); return cloudSave(); } try{ localStorage.setItem('as_draft', JSON.stringify(S)); }catch{ toast('تعذر الحفظ: المساحة ممتلئة، قلّل حجم الصور'); } renderStore(); };
+function toast(t){ $('toast').textContent=t; $('toast').classList.add('on'); setTimeout(()=>$('toast').classList.remove('on'),1600); }
+const prod = id => S.products.find(p => p.id == id);
+
+/* ===== المتجر ===== */
+function renderStore(){
+  applyBrand(); updateAcct();
+  const cats = ['الكل', ...new Set(S.products.map(p => p.cat).filter(Boolean))];
+  $('cats').innerHTML = cats.map(c => `<button aria-pressed="${c===cat}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
+  const list = S.products.filter(p => (cat==='الكل'||p.cat===cat) && p.name.includes(term));
+  $('grid').innerHTML = list.length ? list.map(p => `
+    <article class="card"><div class="pic" style="${pic(p)}">${p.img?'':esc(p.emoji||'🛍️')}</div>
+    <div class="info"><h3>${esc(p.name)}</h3>${p.desc?`<p>${esc(p.desc)}</p>`:''}<div class="price">${money(p.price)}</div>
+    <button class="btn add" data-add="${p.id}" ${p.stock<=0?'disabled':''}>${p.stock<=0?'نفد المخزون':'أضف للسلة'}</button></div></article>`).join('')
+    : '<p class="empty">لا توجد منتجات مطابقة</p>';
+  const on = S.pays.filter(m => m.on);
+  $('payInfo').innerHTML = on.length ? `<b>طرق الدفع المتاحة:</b> ${on.map(m=>esc(m.name)).join(' • ')}` : '';
+  const wa = String(S.settings.whatsapp||'').replace(/\D/g,''), fab = $('waFab');
+  fab.style.display = (S.settings.waButton && wa) ? 'grid' : 'none';
+  fab.href = 'https://wa.me/' + wa + '?text=' + encodeURIComponent('مرحباً، عندي استفسار من ' + S.settings.name);
+  renderCart();
+}
+const kashierAvailable = () => cloudOn() && !!S.settings.kashierOn;
+function calcFee(sub, del){ if(!del) return 0; let f = Number(del.fee||0); const fo = Number(S.settings.freeOver||0); if(fo > 0 && sub >= fo) f = 0; return f; }
+function renderCart(){
+  const rows = Object.entries(cart).map(([id,q]) => ({p:prod(id),q})).filter(r => r.p);
+  const sub = rows.reduce((s,r) => s + r.p.price*r.q, 0), n = rows.reduce((s,r) => s + r.q, 0);
+  $('count').textContent = n.toLocaleString('ar-EG');
+  $('items').innerHTML = rows.length ? rows.map(({p,q}) => `
+    <div class="row"><span class="th" style="${pic(p)}">${p.img?'':esc(p.emoji||'🛍️')}</span>
+    <div class="n">${esc(p.name)}<br><small>${money(p.price)}</small></div>
+    <div class="qty"><button data-d="1" data-id="${p.id}">+</button><b>${q.toLocaleString('ar-EG')}</b><button data-d="-1" data-id="${p.id}">−</button></div></div>`).join('')
+    : '<p class="empty">السلة فارغة. أضف منتجاً لتبدأ.</p>';
+  const dels = S.delivery.filter(x => x.on);
+  if(!dels.find(x => x.id == delId)) delId = dels[0] ? dels[0].id : null;
+  const del = dels.find(x => x.id == delId), fee = n ? calcFee(sub, del) : 0;
+  const pays = S.pays.filter(m => m.on);
+  const opts = [...(kashierAvailable() ? [{id:'kashier', name:'دفع إلكتروني (بطاقة / محفظة)'}] : []), ...pays];
+  if(!opts.find(m => m.id == payId)) payId = opts[0] ? opts[0].id : null;
+  const cur = pays.find(m => m.id == payId), isK = payId === 'kashier';
+  const fo = Number(S.settings.freeOver||0);
+  $('foot').innerHTML = !n ? '' : `
+    <div class="line"><span>المنتجات</span><span>${money(sub)}</span></div>
+    <div class="line"><span>التوصيل${del?' ('+esc(del.name)+')':''}</span><span>${fee ? money(fee) : 'مجاني'}</span></div>
+    ${fo>0 ? `<div class="note">شحن مجاني للطلبات فوق ${money(fo)}</div>` : ''}
+    <div class="line tot"><span>الإجمالي</span><span>${money(sub+fee)}</span></div>
+    ${me?`<div class="pdet">👤 ${esc(users[me].name)} • <span dir="ltr">${me}</span></div>`:'<div class="pdet">سجّل الدخول لإتمام الطلب</div>'}
+    <b>طريقة الاستلام</b>
+    ${dels.map(d => `<label class="pm"><input type="radio" name="del" value="${d.id}" ${d.id==delId?'checked':''}> ${esc(d.name)} — ${d.fee ? money(d.fee) : 'مجاني'}</label>`).join('')}
+    ${del && del.note ? `<div class="note">${esc(del.note)}</div>` : ''}
+    ${del && del.needAddr ? `<input class="f" id="cAddr" placeholder="العنوان بالتفصيل" autocomplete="street-address" value="${esc(me?users[me].addr:'')}">` : ''}
+    <b>طريقة الدفع</b>
+    ${opts.map(m => `<label class="pm"><input type="radio" name="pay" value="${m.id}" ${m.id==payId?'checked':''}> ${esc(m.name)}</label>`).join('')}
+    ${isK ? `<div class="pdet">ستنتقل لصفحة دفع آمنة من Kashier لإتمام الدفع بالبطاقة أو المحفظة.</div>` : ''}
+    ${cur?`<div class="pdet">${cur.detail?`<div>حوّل إلى: <code>${esc(cur.detail)}</code> <button class="btn alt" data-copy="${esc(cur.detail)}">نسخ</button></div>`:''}
+      ${cur.note?`<div>${esc(cur.note)}</div>`:''}
+      ${cur.detail?`<input class="f" id="cRef" placeholder="رقم عملية التحويل">`:''}</div>`:''}
+    <button class="buy" id="buy">${isK ? 'ادفع الآن' : 'إرسال الطلب عبر واتساب'}</button>`;
+}
+function openCart(on){ $('drawer').classList.toggle('on',on); $('shade').classList.toggle('on',on); }
+function showMsg(html){ $('msg').innerHTML = `<div class="gbox" style="text-align:start">${html}<button class="btn alt" data-m="close">إغلاق</button></div>`; if(!$('msg').open) $('msg').showModal(); }
+$('msg').onclick = e => { if(e.target.dataset.m === 'close') $('msg').close(); };
+async function sendOrder(){
+  const v = id => ($(id)?.value||'').trim();
+  if(!me) return showGate(sendOrder);
+  const del = S.delivery.filter(x => x.on).find(x => x.id == delId);
+  if(!del) return toast('اختر طريقة الاستلام');
+  if(del.needAddr && !v('cAddr')) return toast('اكتب العنوان بالتفصيل');
+  const isK = payId === 'kashier';
+  const m = isK ? null : S.pays.find(x => x.id == payId && x.on);
+  if(!isK && !m) return toast('اختر طريقة الدفع');
+  if(m && m.detail && !v('cRef')) return toast('اكتب رقم عملية التحويل');
+  if(del.needAddr){ users[me].addr = v('cAddr'); saveUsers(); }
+  const rows = Object.entries(cart).map(([id,q]) => ({p:prod(id),q})).filter(r => r.p);
+  const sub = rows.reduce((s,r) => s + r.p.price*r.q, 0), cu = S.settings.currency;
+  let fee = calcFee(sub, del), total = sub + fee, orderNo = '';
+  const kind = isK ? 'kashier' : (m.detail ? 'manual' : 'cod');
+  const method = isK ? 'دفع إلكتروني (Kashier)' : m.name;
+  const addr = del.needAddr ? v('cAddr') : 'استلام من المتجر', ref = v('cRef');
+  let w = null, res = null;
+  if(cloudOn()){   // تسجيل الطلب وخصم المخزون على السيرفر لكل أنواع الدفع والتوصيل
+    if(!isK) w = window.open('', '_blank');
+    try{
+      res = await rpc('place_order', {p_items: rows.map(r => ({id:r.p.id, qty:r.q})), p_customer:{name:users[me].name, phone:me, addr}, p_delivery:del.id, p_method:method, p_kind:kind, p_note:ref});
+      S.products.forEach(p => { const q = ((res.data && res.data.products) || []).find(x => x.id === p.id); if(q) p.stock = q.stock; });
+      fee = Number(res.fee); total = Number(res.total); orderNo = res.order_no; renderStore();
+    }catch(e){
+      if(w) w.close();
+      const t = String(e.message || ''), mm = t.match(/out_of_stock:([^"]+)/);
+      if(mm){ toast('الكمية المتاحة من "' + mm[1] + '" لا تكفي، راجع السلة'); try{ await refreshStocks(); }catch{} renderStore(); }
+      else if(t.includes('bad_delivery')) toast('طريقة الاستلام غير متاحة الآن، اختر غيرها');
+      else toast('تعذر تأكيد الطلب، تأكد من الاتصال وحاول مرة أخرى');
+      return;
+    }
+  }
+  if(isK){
+    try{
+      const r = await fetch(CLOUD.url + '/functions/v1/kashier', {method:'POST', headers:sbHeaders(), body:JSON.stringify({action:'create', order_id:res.order_id, token:res.token})});
+      const j = await r.json();
+      if(!j.url) throw new Error(j.error || 'failed');
+      cart = {}; saveCart(); try{ localStorage.setItem('as_pending', JSON.stringify({id:res.order_id, token:res.token})); }catch{} location.href = j.url; return;
+    }catch(e){
+      try{ await rpc('cancel_my_order', {p_id:res.order_id, p_token:res.token}); await refreshStocks(); renderStore(); }catch{}
+      return showMsg('<b>تعذر فتح الدفع الإلكتروني</b><p class="note">لم يتم تسجيل طلبك. جرّب طريقة دفع أخرى أو تواصل معنا على واتساب.</p>');
+    }
+  }
+  const msg = [`طلب جديد من ${S.settings.name}${orderNo ? ' (' + orderNo + ')' : ''}`,
+    ...rows.map(r => `• ${r.p.name} × ${r.q} = ${r.p.price*r.q} ${cu}`),
+    `المنتجات: ${sub} ${cu}`, `التوصيل: ${del.name} - ${fee} ${cu}`, `الإجمالي: ${total} ${cu}`,
+    `الدفع: ${method}${ref ? ` (عملية: ${ref})` : ''}`, `الاسم: ${users[me].name}`, `الموبايل: ${me}`, `العنوان: ${addr}`].join('\n');
+  const url = `https://wa.me/${S.settings.whatsapp}?text=${encodeURIComponent(msg)}`;
+  if(w) w.location.href = url; else window.open(url, '_blank');
+  cart = {}; saveCart(); renderCart(); openCart(false);
+  toast(orderNo ? 'تم تسجيل طلبك ' + orderNo + '، أكمل الإرسال من واتساب' : 'تم تجهيز الطلب، أكمل الإرسال من واتساب');
+}
+async function verifyKashier(id, token, query){
+  try{ history.replaceState({}, '', location.pathname); }catch{}
+  showMsg('<b>جاري التأكد من الدفع...</b>');
+  try{
+    const r = await fetch(CLOUD.url + '/functions/v1/kashier', {method:'POST', headers:sbHeaders(), body:JSON.stringify({action:'verify', order_id:Number(id), token, query:query||''})});
+    const j = await r.json(), wa = String(S.settings.whatsapp||'').replace(/\D/g,'');
+    try{ if(j.status === 'paid' || j.status === 'failed') localStorage.removeItem('as_pending'); }catch{}
+    if(j.status === 'paid'){
+      cart = {}; saveCart(); renderCart();
+      showMsg(`<b>تم الدفع بنجاح ✓</b><p>رقم طلبك: <b>${esc(j.order_no)}</b><br>الإجمالي: ${money(j.total)}</p>
+        <a class="btn" style="text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${encodeURIComponent('تم دفع الطلب ' + j.order_no + ' إلكترونياً')}">أبلغ المتجر على واتساب</a>`);
+    } else if(j.status === 'failed'){
+      showMsg('<b>لم تتم عملية الدفع</b><p class="note">تم إلغاء الطلب وإرجاع الكميات. يمكنك المحاولة مرة أخرى.</p>');
+    } else {
+      showMsg('<b>الدفع قيد المعالجة</b><p class="note">لو تم الخصم من حسابك تواصل معنا على واتساب ومعك رقم الطلب ' + esc(j.order_no || '') + '</p>');
+    }
+  }catch{ showMsg('<b>تعذر التأكد من الدفع</b><p class="note">لو تم الخصم من حسابك تواصل معنا على واتساب.</p>'); }
+}
+$('cats').onclick = e => { if(e.target.dataset.c){ cat = e.target.dataset.c; renderStore(); } };
+$('q').oninput = e => { term = e.target.value.trim(); renderStore(); };
+$('grid').onclick = e => { const id = e.target.dataset.add; if(!id) return; const p = prod(id);
+  if((cart[id]||0) >= p.stock) return toast('وصلت للحد الأقصى المتاح'); cart[id] = (cart[id]||0)+1; saveCart(); renderCart(); toast('تمت الإضافة للسلة'); };
+$('items').onclick = e => { const {d,id} = e.target.dataset; if(!d) return; const p = prod(id);
+  const n = (cart[id]||0) + Number(d); if(n > p.stock) return toast('وصلت للحد الأقصى المتاح'); n<=0 ? delete cart[id] : cart[id]=n; saveCart(); renderCart(); };
+$('foot').onclick = e => { if(e.target.id==='buy') sendOrder();
+  if(e.target.dataset.copy) navigator.clipboard?.writeText(e.target.dataset.copy).then(()=>toast('تم النسخ')); };
+$('foot').onchange = e => { const nm = e.target.name; if(nm !== 'pay' && nm !== 'del') return;
+  if(nm === 'pay') payId = e.target.value === 'kashier' ? 'kashier' : Number(e.target.value); else delId = Number(e.target.value);
+  const keep = $('cAddr') ? $('cAddr').value : ''; renderCart(); if($('cAddr')) $('cAddr').value = keep; };
+$('cartBtn').onclick = () => openCart(true);
+$('close').onclick = $('shade').onclick = () => openCart(false);
+
+/* ===== لوحة الإدارة ===== */
+let tab = 'products', editId = null, pendingImg = null;
+const A = $('admin');
+function openAdmin(){
+  A.classList.add('on');
+  if(sessionStorage.getItem('as_admin') === '1') return renderAdmin();
+  A.innerHTML = `<div class="ah"><h2>دخول الإدارة</h2><button class="btn alt" data-a="exit">رجوع</button></div>
+    <div class="login"><p>اكتب كود الدخول</p><input id="code" type="password" maxlength="40" autocomplete="off">
+    <button class="btn" data-a="login">دخول</button></div>`;
+  $('code').focus();
+}
+function renderAdmin(){
+  const T = [['products','المنتجات'],['orders','الطلبات'],['pays','طرق الدفع'],['delivery','التوصيل'],['customers','العملاء'],['settings','الإعدادات'],['publish','النشر']];
+  A.innerHTML = `<div class="ah"><h2>لوحة إدارة ${esc(S.settings.name)}</h2><button class="btn alt" data-a="exit">المتجر</button><button class="btn alt" data-a="logout">خروج</button></div>
+    <div class="tabs">${T.map(([k,l]) => `<button data-tab="${k}" aria-pressed="${tab===k}">${l}</button>`).join('')}</div>
+    <div class="ab">${ {products:tProducts, orders:tOrders, pays:tPays, delivery:tDelivery, customers:tCustomers, settings:tSettings, publish:tPublish}[tab]() }</div>`;
+}
+function tProducts(){
+  const p = S.products.find(x => x.id === editId) || {name:'',price:'',cat:'',stock:10,desc:'',emoji:'🛍️',img:''};
+  return `<div class="box"><b>${editId?'تعديل منتج':'إضافة منتج'}</b>
+    <label>الاسم<input class="f" id="pName" value="${esc(p.name)}"></label>
+    <div class="two"><label>السعر<input class="f" id="pPrice" type="number" min="0" value="${esc(p.price)}"></label>
+    <label>المخزون<input class="f" id="pStock" type="number" min="0" value="${esc(p.stock)}"></label></div>
+    <div class="two"><label>القسم<input class="f" id="pCat" value="${esc(p.cat)}"></label>
+    <label>إيموجي (بديل الصورة)<input class="f" id="pEmoji" value="${esc(p.emoji)}"></label></div>
+    <label>الوصف<input class="f" id="pDesc" value="${esc(p.desc)}"></label>
+    <label>صورة المنتج<input class="f" id="pImg" type="file" accept="image/*"></label>
+    ${(pendingImg||p.img)?`<div class="th" style="width:70px;height:70px;border-radius:10px;background:url(${pendingImg||p.img}) center/cover"></div>`:''}
+    <div class="two"><button class="btn" data-a="saveProd">${editId?'حفظ التعديل':'إضافة المنتج'}</button>
+    ${editId?'<button class="btn alt" data-a="cancelEdit">إلغاء</button>':''}</div></div>
+    ${S.products.map(x => `<div class="li"><span class="th" style="width:44px;height:44px;border-radius:10px;display:grid;place-items:center;${pic(x)}">${x.img?'':esc(x.emoji||'🛍️')}</span>
+      <div class="n">${esc(x.name)}<br><small>${money(x.price)} • مخزون ${x.stock} • ${esc(x.cat)}</small></div>
+      <button class="btn alt" data-edit="${x.id}">تعديل</button><button class="btn red" data-del="${x.id}">حذف</button></div>`).join('') || '<p class="note">لا توجد منتجات.</p>'}`;
+}
+function tPays(){
+  const s = S.settings;
+  return `<div class="box"><b>الدفع الإلكتروني (Kashier)</b>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-sf="kashierOn" ${s.kashierOn?'checked':''}> تفعيل الدفع الإلكتروني للعملاء</label>
+    <p class="note">${cloudOn() ? 'عند التفعيل يظهر للعميل خيار "دفع إلكتروني" بجانب الدفع اليدوي، وتقدر توقفه في أي وقت. يتطلب تجهيز دالة kashier على Supabase وإضافة مفاتيحك السرية (راجع KASHIER_SETUP.md).' : 'يتطلب تفعيل الربط بالسيرفر (Supabase) أولاً.'}</p></div>
+  <p class="note" style="margin-bottom:10px">الدفع يدوي: العميل يحوّل المبلغ ويكتب رقم العملية، وأنت تتأكد من وصول التحويل قبل تجهيز الطلب.</p>
+  ${S.pays.map(m => `<div class="box" data-pid="${m.id}">
+    <label>الاسم<input class="f" data-pf="name" value="${esc(m.name)}"></label>
+    <label>الرقم أو الحساب (اتركه فارغاً للدفع عند الاستلام)<input class="f" data-pf="detail" value="${esc(m.detail)}"></label>
+    <label>تعليمات للعميل<input class="f" data-pf="note" value="${esc(m.note)}"></label>
+    <div class="two"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-pf="on" ${m.on?'checked':''}> مفعّلة</label>
+    <button class="btn red" data-delpay="${m.id}">حذف</button></div></div>`).join('')}
+  <button class="btn" data-a="addPay">إضافة طريقة دفع</button>`;
+}
+function tSettings(){
+  const s = S.settings;
+  return `<div class="box"><b>هوية المتجر</b>
+    <label>اسم المتجر (يظهر كاسم التطبيق)<input class="f" data-sf="name" value="${esc(s.name)}"></label>
+    <label>صورة المتجر (أيقونة التطبيق)<input class="f" id="logoFile" type="file" accept="image/*"></label>
+    ${s.logo?`<div style="display:flex;gap:10px;align-items:center"><img src="${s.logo}" width="64" height="64" style="border-radius:14px" alt=""><button class="btn alt" data-a="removeLogo">حذف الصورة</button></div>`:''}
+    <p class="note">الصورة تُقصّ مربعة تلقائياً. لو التطبيق مثبّت بالفعل، احذفه وثبّته من جديد لتظهر الأيقونة والاسم الجديدان.</p></div>
+  <div class="box"><b>بيانات المتجر</b>
+    <label>رقم واتساب المتجر للتواصل واستقبال الطلبات (بالصيغة الدولية بدون +)<input class="f" data-sf="whatsapp" inputmode="numeric" value="${esc(s.whatsapp)}"></label>
+    <div class="two"><label>العملة<input class="f" data-sf="currency" value="${esc(s.currency)}"></label>
+    </div>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-sf="requireLogin" ${s.requireLogin?'checked':''}> إلزام العميل بتسجيل الدخول لدخول المتجر</label>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-sf="waButton" ${s.waButton?'checked':''}> إظهار زر واتساب العائم للتواصل</label></div>
+  <div class="box"><b>تغيير كود دخول الإدارة</b>
+    <label>الكود الحالي<input class="f" id="cc0" type="password" autocomplete="off"></label>
+    <div class="two"><label>الكود الجديد (6 خانات على الأقل)<input class="f" id="cc1" type="password" autocomplete="off"></label>
+    <label>تأكيد الكود<input class="f" id="cc2" type="password" autocomplete="off"></label></div>
+    <button class="btn" data-a="changeCode">تغيير الكود</button>
+    <p class="note">${cloudOn()?'الكود الجديد يسري فوراً على كل الأجهزة. استخدم كوداً طويلاً يصعب تخمينه.':'الكود الجديد يسري على هذا الجهاز فوراً، ولكي يسري على باقي الأجهزة انشر ملف data.json من تبويب "النشر".'}</p></div>`;
+}
+function tPublish(){
+  if(cloudOn()) return `<div class="box"><b>النشر تلقائي</b>
+    <p class="note">كل تعديل تعمله (منتج، سعر، طريقة دفع، اسم، صورة) بيتحفظ وبيظهر للعملاء فوراً، من غير تنزيل أو رفع أي ملف.</p>
+    <button class="btn" data-a="syncNow">حفظ الحالة الحالية الآن</button></div>`;
+  return `<div class="box"><b>نشر التعديلات للعملاء</b>
+    <p class="note">تعديلاتك تظهر عندك فوراً. لتظهر لكل العملاء: اضغط "تنزيل ملف النشر"، ثم ارفع ملف <b>data.json</b> الناتج مكان القديم في نفس فولدر الموقع على الاستضافة.</p>
+    <button class="btn" data-a="export">تنزيل ملف النشر (data.json)</button>
+    <p class="note">عايز تلغي خطوة data.json؟ فعّل الربط بالسيرفر: راجع ملف setup.sql وحط بيانات المشروع في CLOUD أول الكود.</p></div>
+    <div class="box"><b>استيراد / رجوع</b>
+    <label>استيراد data.json<input class="f" id="imp" type="file" accept="application/json"></label>
+    <button class="btn alt" data-a="resetDraft">تجاهل مسودتي والرجوع للمنشور</button></div>`;
+}
+const num = v => Math.max(0, Number(v)||0);
+function resize(file){ return new Promise(res => { const r = new FileReader(); r.onload = () => { const i = new Image(); i.onload = () => {
+  const k = Math.min(1, 480/Math.max(i.width,i.height)), c = document.createElement('canvas'); c.width = i.width*k; c.height = i.height*k;
+  c.getContext('2d').drawImage(i,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',.72)); }; i.src = r.result; }; r.readAsDataURL(file); }); }
+
+A.onclick = async e => {
+  const t = e.target, a = t.dataset.a;
+  if(t.dataset.tab){ tab = t.dataset.tab; editId = null; pendingImg = null; if(tab === 'products'){ try{ await refreshStocks(); }catch{} } if(tab === 'orders') await loadOrders(); return renderAdmin(); }
+  if(a==='exit'){ A.classList.remove('on'); return; }
+  if(a==='logout'){ sessionStorage.removeItem('as_admin'); A.classList.remove('on'); return; }
+  if(a==='login'){
+    const h = sha('as:' + $('code').value); let ok = false;
+    if(cloudOn()){ try{ ok = await rpc('check_admin', {p_hash:h}); }catch{ return toast('تعذر الاتصال بالسيرفر'); } }
+    else ok = (h === adminHash());
+    if(ok){ sessionStorage.setItem('as_admin','1'); try{ sessionStorage.setItem('as_ah', h); }catch{} try{ await refreshStocks(); }catch{} renderAdmin(); }
+    else { toast('الكود غير صحيح'); $('code').value = ''; }
+    return; }
+  if(a==='saveProd'){
+    const name = $('pName').value.trim(); if(!name || !$('pPrice').value) return toast('اكتب الاسم والسعر');
+    const old = S.products.find(x => x.id === editId);
+    const item = {id: old?.id ?? Date.now(), name, price:num($('pPrice').value), stock:num($('pStock').value), cat:$('pCat').value.trim(),
+      emoji:$('pEmoji').value.trim()||'🛍️', desc:$('pDesc').value.trim(), img: pendingImg ?? old?.img ?? ''};
+    if(!old || old.stock !== item.stock) dirtyStock.add(item.id);
+    old ? Object.assign(old,item) : S.products.push(item);
+    editId = null; pendingImg = null; saveDraft(); renderAdmin(); return toast('تم الحفظ');
+  }
+  if(a==='cancelEdit'){ editId = null; pendingImg = null; return renderAdmin(); }
+  if(t.dataset.edit){ editId = Number(t.dataset.edit); pendingImg = null; renderAdmin(); return A.querySelector('.ab').scrollTo(0,0); }
+  if(t.dataset.del){ if(confirm('حذف هذا المنتج؟')){ S.products = S.products.filter(x => x.id != t.dataset.del); delete cart[t.dataset.del]; saveCart(); saveDraft(); renderAdmin(); } return; }
+  if(a==='addPay'){ S.pays.push({id:Date.now(),name:'طريقة جديدة',detail:'',note:'',on:false}); saveDraft(); return renderAdmin(); }
+  if(t.dataset.delpay){ if(confirm('حذف طريقة الدفع؟')){ S.pays = S.pays.filter(x => x.id != t.dataset.delpay); saveDraft(); renderAdmin(); } return; }
+  if(a==='export'){ const b = new Blob([JSON.stringify(S,null,2)],{type:'application/json'}), l = document.createElement('a');
+    l.href = URL.createObjectURL(b); l.download = 'data.json'; l.click(); return toast('ارفع data.json على الاستضافة'); }
+  if(a==='addDel'){ S.delivery.push({id:Date.now(),name:'طريقة جديدة',fee:0,needAddr:true,note:'',on:false}); saveDraft(); return renderAdmin(); }
+  if(t.dataset.deldel){ if(confirm('حذف طريقة التوصيل؟')){ S.delivery = S.delivery.filter(x => x.id != t.dataset.deldel); saveDraft(); renderAdmin(); } return; }
+  if(a==='reloadOrders'){ await loadOrders(); return renderAdmin(); }
+  if(t.dataset.os){
+    if(t.dataset.os === 'cancelled' && !confirm('إلغاء الطلب وإرجاع الكميات للمخزون؟')) return;
+    try{ await rpc('admin_set_order', {p_hash:sessionStorage.getItem('as_ah'), p_id:Number(t.dataset.oid), p_status:t.dataset.os});
+      await loadOrders(); try{ await refreshStocks(); }catch{} renderStore(); renderAdmin(); toast('تم التحديث'); }
+    catch{ toast('تعذر التحديث'); } return; }
+  if(a==='syncNow') return cloudSave();
+  if(a==='removeLogo'){ S.settings.logo = ''; saveDraft(); return renderAdmin(); }
+  if(a==='changeCode'){
+    const c0 = $('cc0').value, c1 = $('cc1').value, c2 = $('cc2').value;
+    if(c1.length < 6) return toast('الكود الجديد 6 خانات على الأقل (أرقام أو حروف)');
+    if(c1 !== c2) return toast('تأكيد الكود غير مطابق');
+    if(cloudOn()){
+      try{ await rpc('change_admin', {p_old:sha('as:'+c0), p_new:sha('as:'+c1)}); try{ sessionStorage.setItem('as_ah', sha('as:'+c1)); }catch{} renderAdmin(); return toast('تم تغيير كود الإدارة'); }
+      catch{ return toast('الكود الحالي غير صحيح أو تعذر الاتصال'); }
+    }
+    if(sha('as:'+c0) !== adminHash()) return toast('الكود الحالي غير صحيح');
+    S.settings.adminHash = sha('as:'+c1); saveDraft(); renderAdmin(); return toast('تم تغيير كود الإدارة');
+  }
+  if(t.dataset.deluser){ if(confirm('حذف هذا الحساب من هذا الجهاز؟')){ const k = t.dataset.deluser; delete users[k];
+    if(me===k){ me = null; try{ localStorage.removeItem('as_session'); }catch{} } saveUsers(); updateAcct(); renderAdmin(); } return; }
+  if(a==='resetDraft'){ if(confirm('سيتم حذف تعديلاتك غير المنشورة. متأكد؟')){ localStorage.removeItem('as_draft'); location.reload(); } }
+};
+A.onchange = async e => {
+  const t = e.target;
+  if(t.id==='pImg' && t.files[0]){ pendingImg = await resize(t.files[0]); const keep = ['pName','pPrice','pStock','pCat','pEmoji','pDesc'].map(i=>$(i).value); renderAdmin(); ['pName','pPrice','pStock','pCat','pEmoji','pDesc'].forEach((i,k)=>$(i).value=keep[k]); }
+  if(t.id==='imp' && t.files[0]){ try{ const d = JSON.parse(await t.files[0].text()); if(!d.products||!d.pays||!d.settings) throw 0; S = d; S.products.forEach(p => dirtyStock.add(p.id)); saveDraft(); renderAdmin(); toast('تم الاستيراد'); }catch{ toast('ملف غير صالح'); } }
+  if(t.id==='logoFile' && t.files[0]){ S.settings.logo = await logoFrom(t.files[0]); saveDraft(); renderAdmin(); return toast('تم تحديث صورة المتجر'); }
+  const dbox = t.closest('[data-did]');
+  if(dbox && t.dataset.df){ const d = S.delivery.find(x => x.id == dbox.dataset.did);
+    d[t.dataset.df] = t.type==='checkbox' ? t.checked : t.type==='number' ? num(t.value) : t.value.trim(); saveDraft(); }
+  const box = t.closest('[data-pid]');
+  if(box && t.dataset.pf){ const m = S.pays.find(x => x.id == box.dataset.pid); m[t.dataset.pf] = t.type==='checkbox' ? t.checked : t.value.trim(); saveDraft(); }
+  if(t.dataset.sf){ S.settings[t.dataset.sf] = t.type==='checkbox' ? t.checked : t.type==='number' ? num(t.value) : t.value.trim(); saveDraft(); }
+};
+$('adminLink').onclick = openAdmin;
+if(location.hash === '#admin') window.addEventListener('load', openAdmin);
+
+/* ===== الهوية والحسابات ===== */
+const K = [], H0 = [];
+(() => { let n = 2, c = 0; while(c < 64){ let p = true; for(let i = 2; i*i <= n; i++) if(n % i === 0){ p = false; break; }
+  if(p){ K.push(Math.floor((Math.cbrt(n)%1)*2**32)); if(c < 8) H0.push(Math.floor((Math.sqrt(n)%1)*2**32)); c++; } n++; } })();
+function sha(str){
+  const b = [...new TextEncoder().encode(str)], l = b.length*8; b.push(0x80); while(b.length % 64 !== 56) b.push(0);
+  for(let i = 7; i >= 0; i--) b.push(i > 3 ? 0 : (l >>> (i*8)) & 255);
+  let h = H0.slice(); const w = new Array(64), R = (x,n) => (x>>>n)|(x<<(32-n));
+  for(let o = 0; o < b.length; o += 64){
+    for(let i = 0; i < 16; i++) w[i] = (b[o+4*i]<<24)|(b[o+4*i+1]<<16)|(b[o+4*i+2]<<8)|b[o+4*i+3];
+    for(let i = 16; i < 64; i++){ const s0 = R(w[i-15],7)^R(w[i-15],18)^(w[i-15]>>>3), s1 = R(w[i-2],17)^R(w[i-2],19)^(w[i-2]>>>10); w[i] = (w[i-16]+s0+w[i-7]+s1)|0; }
+    let [a,bb,c,d,e,f,g,hh] = h;
+    for(let i = 0; i < 64; i++){
+      const S1 = R(e,6)^R(e,11)^R(e,25), ch = (e&f)^(~e&g), t1 = (hh+S1+ch+K[i]+w[i])|0,
+            S0 = R(a,2)^R(a,13)^R(a,22), mj = (a&bb)^(a&c)^(bb&c), t2 = (S0+mj)|0;
+      hh = g; g = f; f = e; e = (d+t1)|0; d = c; c = bb; bb = a; a = (t1+t2)|0;
+    }
+    h = [h[0]+a,h[1]+bb,h[2]+c,h[3]+d,h[4]+e,h[5]+f,h[6]+g,h[7]+hh].map(x => x|0);
+  }
+  return h.map(x => (x>>>0).toString(16).padStart(8,'0')).join('');
+}
+const adminHash = () => S.settings.adminHash || DEF_HASH;
+
+// الاسم والأيقونة
+let brandKey = '';
+function iconUrl(src, size){ return new Promise(res => { const i = new Image(); i.onload = () => { const c = document.createElement('canvas'); c.width = c.height = size; c.getContext('2d').drawImage(i,0,0,size,size); res(c.toDataURL('image/png')); }; i.src = src; }); }
+function logoFrom(file){ return new Promise(res => { const r = new FileReader(); r.onload = () => { const i = new Image(); i.onload = () => {
+  const c = document.createElement('canvas'); c.width = c.height = 512; const m = Math.min(i.width,i.height);
+  c.getContext('2d').drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,512,512); res(c.toDataURL('image/png')); }; i.src = r.result; }; r.readAsDataURL(file); }); }
+async function applyBrand(){
+  const s = S.settings;
+  $('title').textContent = s.name; document.title = s.name;
+  const lg = $('logo'); if(s.logo){ lg.src = s.logo; lg.style.display = 'block'; } else lg.style.display = 'none';
+  document.querySelectorAll('link[rel=icon],link[rel=apple-touch-icon]').forEach(l => { l.href = s.logo || 'icon.svg'; l.type = s.logo ? 'image/png' : 'image/svg+xml'; });
+  const key = s.name + '|' + (s.logo||'').length; if(key === brandKey) return; brandKey = key;
+  const icons = s.logo ? [{src:await iconUrl(s.logo,192),sizes:'192x192',type:'image/png',purpose:'any'},{src:await iconUrl(s.logo,512),sizes:'512x512',type:'image/png',purpose:'any'}]
+    : [{src:new URL('icon.svg',location.href).href,sizes:'any',type:'image/svg+xml',purpose:'any'}];
+  const m = {name:s.name,short_name:s.name.slice(0,12),start_url:new URL('index.html',location.href).href,scope:new URL('./',location.href).href,
+    display:'standalone',lang:'ar',dir:'rtl',background_color:'#F6F8FA',theme_color:'#0B7A75',icons};
+  document.querySelector('link[rel=manifest]').href = URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}));
+}
+
+// حسابات العملاء (محفوظة على جهاز العميل)
+const norm = p => String(p).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');
+const pw = (phone, p) => sha('u:' + phone + ':' + p);
+function loadUsers(){ try{ users = JSON.parse(localStorage.getItem('as_users')||'{}'); }catch{ users = {}; }
+  const s = localStorage.getItem('as_session'); me = s && users[s] ? s : null; }
+const saveUsers = () => { try{ localStorage.setItem('as_users', JSON.stringify(users)); }catch{} };
+function updateAcct(){ $('acctBtn').textContent = me ? '👤 ' + users[me].name.split(' ')[0] : '👤 دخول'; }
+let gateMode = 'login', gateAfter = null;
+function showGate(after){ gateAfter = after || null; renderGate(); $('gate').classList.add('on'); }
+function renderGate(){
+  const reg = gateMode === 'register', s = S.settings;
+  $('gate').innerHTML = `<div class="gbox">${s.logo?`<img src="${s.logo}" alt="">`:''}<h2>${esc(s.name)}</h2>
+    <div class="seg"><button class="btn ${reg?'alt':''}" data-g="login">دخول</button><button class="btn ${reg?'':'alt'}" data-g="register">حساب جديد</button></div>
+    ${reg?'<input class="f" id="gName" placeholder="الاسم" autocomplete="name">':''}
+    <input class="f" id="gPhone" type="tel" inputmode="tel" placeholder="رقم الموبايل" autocomplete="tel">
+    <input class="f" id="gPass" type="password" placeholder="كلمة السر (4 حروف أو أرقام على الأقل)" autocomplete="${reg?'new-password':'current-password'}">
+    <label style="font-size:.85rem"><input type="checkbox" id="gShow"> إظهار كلمة السر</label>
+    <button class="btn" data-g="go">${reg?'إنشاء الحساب':'دخول'}</button>
+    ${s.requireLogin?'':'<button class="btn alt" data-g="close">لاحقاً</button>'}
+    <button class="lnk" data-g="admin">دخول الإدارة</button></div>`;
+}
+function submitGate(){
+  const ph = norm($('gPhone').value), p = $('gPass').value;
+  if(ph.length < 10 || ph.length > 15) return toast('اكتب رقم موبايل صحيح');
+  if(p.length < 4) return toast('كلمة السر 4 حروف أو أرقام على الأقل');
+  if(gateMode === 'register'){
+    const nm = $('gName').value.trim(); if(!nm) return toast('اكتب اسمك');
+    if(users[ph]) return toast('هذا الرقم مسجل بالفعل، سجّل الدخول');
+    users[ph] = {name:nm, hash:pw(ph,p), addr:''};
+  } else {
+    const u = users[ph];
+    if(!u) return toast('لا يوجد حساب بهذا الرقم على هذا الجهاز، أنشئ حساباً جديداً');
+    if(u.hash !== pw(ph,p)) return toast('كلمة السر غير صحيحة');
+  }
+  me = ph; try{ localStorage.setItem('as_session', ph); }catch{} saveUsers(); updateAcct();
+  $('gate').classList.remove('on'); toast('أهلاً ' + users[me].name);
+  const f = gateAfter; gateAfter = null; f ? f() : renderCart();
+}
+$('gate').onclick = e => { const g = e.target.dataset.g; if(!g) return;
+  if(g === 'login' || g === 'register'){ gateMode = g; return renderGate(); }
+  if(g === 'go') return submitGate();
+  if(g === 'close'){ gateAfter = null; return $('gate').classList.remove('on'); }
+  if(g === 'admin') return openAdmin(); };
+$('gate').onchange = e => { if(e.target.id === 'gShow') $('gPass').type = e.target.checked ? 'text' : 'password'; };
+$('gate').onkeydown = e => { if(e.key === 'Enter') submitGate(); };
+function openAcct(){
+  const u = users[me];
+  $('acct').innerHTML = `<div class="gbox" style="text-align:start"><b>حسابي</b>
+    <div class="pdet">👤 ${esc(u.name)}<br><span dir="ltr">${me}</span></div>
+    <b>تغيير كلمة السر</b>
+    <input class="f" id="aOld" type="password" placeholder="كلمة السر الحالية">
+    <input class="f" id="aNew" type="password" placeholder="كلمة السر الجديدة">
+    <button class="btn" data-ac="pass">حفظ كلمة السر</button>
+    <div class="seg"><button class="btn alt" data-ac="close">إغلاق</button><button class="btn red" data-ac="out">تسجيل الخروج</button></div></div>`;
+  $('acct').showModal();
+}
+$('acct').onclick = e => { const a = e.target.dataset.ac; if(!a) return;
+  if(a === 'close') return $('acct').close();
+  if(a === 'out'){ me = null; try{ localStorage.removeItem('as_session'); }catch{} $('acct').close(); updateAcct(); renderCart(); if(S.settings.requireLogin) showGate(); return; }
+  if(a === 'pass'){ const u = users[me];
+    if(u.hash !== pw(me,$('aOld').value)) return toast('كلمة السر الحالية غير صحيحة');
+    if($('aNew').value.length < 4) return toast('كلمة السر الجديدة 4 على الأقل');
+    u.hash = pw(me,$('aNew').value); saveUsers(); $('acct').close(); toast('تم تغيير كلمة السر'); } };
+$('acctBtn').onclick = () => me ? openAcct() : showGate();
+const STAT = {new:'جديد', awaiting_payment:'بانتظار الدفع الإلكتروني', paid:'مدفوع', delivered:'تم التسليم', cancelled:'ملغي'};
+async function loadOrders(){
+  ordersList = []; if(!cloudOn()) return;
+  try{ ordersList = await rpc('list_orders', {p_hash:sessionStorage.getItem('as_ah')}) || []; }catch{ toast('تعذر تحميل الطلبات'); }
+}
+function tOrders(){
+  if(!cloudOn()) return '<p class="note">قائمة الطلبات تحتاج تفعيل الربط بالسيرفر (Supabase).</p>';
+  return `<button class="btn alt" data-a="reloadOrders" style="margin-bottom:10px">تحديث</button>` +
+  (ordersList.map(o => { const c = o.customer || {}; return `<div class="box">
+    <div class="line"><b>AS-${o.id}</b><span class="st">${esc(STAT[o.status] || o.status)}</span></div>
+    <div class="note">${new Date(o.created_at).toLocaleString('ar-EG')}</div>
+    <div>${esc(c.name)} • <a href="tel:${esc(c.phone)}" dir="ltr">${esc(c.phone)}</a></div>
+    <div class="note">${esc(c.addr)}</div>
+    <div>${(o.items || []).map(i => esc(i.name) + ' × ' + i.qty).join('، ')}</div>
+    <div class="note">${esc(o.delivery_name || '')}: ${money(o.delivery_fee)} • ${esc(o.method || '')}${o.note ? ' • عملية: ' + esc(o.note) : ''}</div>
+    <div class="line tot"><span>الإجمالي</span><span>${money(o.total)}</span></div>
+    ${o.status === 'cancelled' ? '' : `<div class="two"><button class="btn" data-os="paid" data-oid="${o.id}">تم الدفع</button><button class="btn" data-os="delivered" data-oid="${o.id}">تم التسليم</button></div>
+    <button class="btn red" data-os="cancelled" data-oid="${o.id}">إلغاء وإرجاع المخزون</button>`}</div>`; }).join('') || '<p class="note">لا توجد طلبات بعد.</p>');
+}
+function tDelivery(){
+  return `<p class="note" style="margin-bottom:10px">حدد طرق الاستلام والتوصيل ورسوم كل طريقة. "يحتاج عنوان" معناها العميل يكتب عنوانه (للتوصيل)، وبدونها تبقى استلام من المتجر.</p>
+  ${S.delivery.map(d => `<div class="box" data-did="${d.id}">
+    <label>الاسم<input class="f" data-df="name" value="${esc(d.name)}"></label>
+    <div class="two"><label>الرسوم<input class="f" data-df="fee" type="number" min="0" value="${esc(d.fee)}"></label>
+    <label>ملاحظة للعميل<input class="f" data-df="note" value="${esc(d.note)}"></label></div>
+    <div class="two"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-df="needAddr" ${d.needAddr?'checked':''}> يحتاج عنوان</label>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-df="on" ${d.on?'checked':''}> مفعّلة</label></div>
+    <button class="btn red" data-deldel="${d.id}">حذف</button></div>`).join('')}
+  <button class="btn" data-a="addDel">إضافة طريقة توصيل</button>
+  <div class="box" style="margin-top:12px"><label>شحن مجاني للطلبات فوق (0 = غير مفعّل)<input class="f" data-sf="freeOver" type="number" min="0" value="${esc(S.settings.freeOver)}"></label></div>`;
+}
+function tCustomers(){
+  const L = Object.entries(users);
+  return `<p class="note" style="margin-bottom:10px">حسابات العملاء تُحفظ على جهاز كل عميل، وهذه القائمة تعرض الحسابات الموجودة على هذا الجهاز فقط. حذف حساب يسمح لصاحبه بإنشاء حساب جديد بنفس الرقم لو نسي كلمة السر.</p>
+  ${L.map(([p,u]) => `<div class="li"><div class="n">${esc(u.name)}<br><small dir="ltr">${p}</small></div><button class="btn red" data-deluser="${p}">حذف</button></div>`).join('') || '<p class="note">لا توجد حسابات على هذا الجهاز.</p>'}`;
+}
+
+/* ===== PWA ===== */
+let deferred;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('install').style.display='block'; });
+$('install').onclick = async () => { if(!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; $('install').style.display='none'; };
+if('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+
+load().then(() => { renderStore(); if(S.settings.requireLogin && !me) showGate();
+  const qp = new URLSearchParams(location.search);
+  if(cloudOn() && qp.get('kashier_order')) verifyKashier(qp.get('kashier_order'), qp.get('t'), location.search.slice(1));
+  else if(cloudOn() && qp.get('paymentStatus')){ let pd = null; try{ pd = JSON.parse(localStorage.getItem('as_pending')||'null'); }catch{} if(pd) verifyKashier(pd.id, pd.token, location.search.slice(1)); } });
+</script>
+</body>
+</html>

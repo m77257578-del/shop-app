@@ -1,0 +1,13 @@
+{
+  "name": "App Shop",
+  "short_name": "App Shop",
+  "description": "متجر إلكتروني يعمل كتطبيق",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "lang": "ar",
+  "dir": "rtl",
+  "background_color": "#F6F8FA",
+  "theme_color": "#0B7A75",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
